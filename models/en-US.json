@@ -1,27 +1,127 @@
 {
-  "interactionModel": {
-    "languageModel": {
-      "invocationName": "hello world",
-      "intents": [
-        {
-          "name": "AMAZON.CancelIntent",
-          "samples": []
+    "interactionModel": {
+        "languageModel": {
+            "invocationName": "service center",
+            "intents": [
+                {
+                    "name": "AMAZON.FallbackIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.CancelIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.HelpIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.StopIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.NavigateHomeIntent",
+                    "samples": []
+                },
+                {
+                    "name": "ScheduleService",
+                    "slots": [
+                        {
+                            "name": "serviceDay",
+                            "type": "AMAZON.DATE",
+                            "samples": [
+                                "How about {serviceDay}",
+                                "{serviceDay}"
+                            ]
+                        },
+                        {
+                            "name": "serviceTime",
+                            "type": "AMAZON.TIME",
+                            "samples": [
+                                "I'd like to start at {serviceTime}",
+                                "{serviceTime}",
+                                "How about {serviceTime}"
+                            ]
+                        }
+                    ],
+                    "samples": [
+                        "schedule a service",
+                        "schedule a service appointment",
+                        "make an appointment",
+                        "schedule an appointment",
+                        "I'd like to schedule a service appointment"
+                    ]
+                },
+                {
+                    "name": "NetworkStatus",
+                    "samples": [
+                        "What is the network status",
+                        "network status"
+                    ]
+                },
+                {
+                    "name": "ChooseTime",
+                    "slots": [
+                        {
+                            "name": "timeofday",
+                            "type": "AMAZON.TIME"
+                        }
+                    ],
+                    "samples": [
+                        "{timeofday}"
+                    ]
+                }
+            ],
+            "types": []
         },
-        {
-          "name": "AMAZON.HelpIntent",
-          "samples": []
+        "dialog": {
+            "intents": [
+                {
+                    "name": "ScheduleService",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "serviceDay",
+                            "type": "AMAZON.DATE",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.549992979299.680367958282"
+                            }
+                        }, {
+                            "name": "serviceTime",
+                            "type": "AMAZON.TIME",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.549992979299.916148329556"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "delegationStrategy": "ALWAYS"
         },
-        {
-          "name": "AMAZON.StopIntent",
-          "samples": []
-        },
-        {
-          "name": "HelloWorldIntent",
-          "samples": [
-            "hello"
-          ]
-        }
-      ]
+        "prompts": [
+            {
+                "id": "Elicit.Slot.549992979299.680367958282",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What date do you want to schedule the service on?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.549992979299.916148329556",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "what time do you want the service to start at"
+                    }
+                ]
+            }
+        ]
     }
-  }
 }
