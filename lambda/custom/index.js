@@ -110,6 +110,7 @@ const ChooseServiceTimeHandler = {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
       && handlerInput.requestEnvelope.request.intent.name === 'ScheduleService';
   },
+
   async handle(handlerInput) {
     const speechText = 'Your service is confirmed to ';
     const request = handlerInput.requestEnvelope.request;
@@ -132,7 +133,7 @@ const ChooseServiceTimeHandler = {
       var rp = require('request-promise');
 
       var options = {
-        uri: 'http://nms1.uubright.com/api/apts',
+        uri: 'http://nms1.uubright.com/api/appts',
         method: 'POST',
         json : true,
         body : {
@@ -142,14 +143,15 @@ const ChooseServiceTimeHandler = {
       };
   
       await rp(options).then(function(res) {
-        outputText = '';
+        outputText = res;
       }).catch(function (err) {
         // API call fail
-        outputText = "Request to our scheduling server failed. Please try again later";
+        console.log(err);
+        outputText = "Request to our scheduling server failed. " + err;
       });
       return handlerInput.responseBuilder
-        .speak(res)
-        .withSimpleCard('Your appointment is set', res)
+        .speak(outputText)
+        .withSimpleCard('Your appointment is set', outputText)
         .getResponse();
     }
 
@@ -158,8 +160,7 @@ const ChooseServiceTimeHandler = {
       .withSimpleCard('Your appointment request failed', "failed")
       .getResponse(); 
   }   
-},
-};
+}
 
 
 const NetworkStatusIntentHandler = {
