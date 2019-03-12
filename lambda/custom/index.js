@@ -8,7 +8,7 @@ const LaunchRequestHandler = {
     return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
   },
   handle(handlerInput) {
-    const speechText = 'Evergreen Telecom Service Center, what can I do for you?';
+    const speechText = 'Greater China Telecom Service Center, what can I do for you?';
 
     return handlerInput.responseBuilder
       .speak(speechText)
@@ -126,7 +126,7 @@ const ChooseServiceTimeHandler = {
       var timeOfService = request.intent.slots.serviceTime;
       var date = request.intent.slots.serviceDay;
       
-      var dateString = new Date(date.value).toLocaleDateString("en-US", { month: 'short', day: 'numeric', year: 'numeric' });
+      var dateString = new Date(date.value).toLocaleDateString("en-US", { month: 'long', day: 'numeric', year: 'numeric' });
       var timeString = timeOfService.value;
       console.log("request params", dateString, timeString);
       let outputText = '';
