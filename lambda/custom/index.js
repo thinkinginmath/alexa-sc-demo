@@ -53,9 +53,9 @@ const HelpIntentHandler = {
 function httpGet(data, callback) {
   const http = require('http');
   const options = {
-    host: '13.52.107.109',
+    host: 'nms1.uubright.com',
     path: 'api/send_email',
-    port: 9999,
+    port: 80,
     method: 'GET'
   };
   var req = http.request(options, function(res) {
@@ -105,6 +105,19 @@ function httpPost(data, callback) {
   req.end();
 }
 
+function supportsDisplay(handlerInput) {
+  var hasDisplay =
+      handlerInput.requestEnvelope.context &&
+      handlerInput.requestEnvelope.context.System &&
+      handlerInput.requestEnvelope.context.System.device &&
+      handlerInput.requestEnvelope.context.System.device.supportedInterfaces &&
+      handlerInput.requestEnvelope.context.System.device.supportedInterfaces.Display;
+    console.log("Supported Interfaces are" + JSON.stringify(handlerInput.requestEnvelope.context.System.device.supportedInterfaces));
+    
+    console.log("Eval output ---->" + hasDisplay);
+    return true;
+}
+
 const ChooseServiceTimeHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -125,7 +138,7 @@ const ChooseServiceTimeHandler = {
     } else if (request.dialogState === 'COMPLETED') {
       var timeOfService = request.intent.slots.serviceTime;
       var date = request.intent.slots.serviceDay;
-      
+      var outputTitle = "Your apporintment request finished";
       var dateString = new Date(date.value).toLocaleDateString("en-US", { month: 'long', day: 'numeric', year: 'numeric' });
       var timeString = timeOfService.value;
       console.log("request params", dateString, timeString);
@@ -147,11 +160,12 @@ const ChooseServiceTimeHandler = {
       }).catch(function (err) {
         // API call fail
         console.log(err);
-        outputText = "Request to our scheduling server failed. " + err;
+        outputTitle = "Your apporintment request failed";
+        outputText = "Request to our backend scheduling server failed. " + err;
       });
       return handlerInput.responseBuilder
         .speak(outputText)
-        .withSimpleCard('Your appointment is set', outputText)
+        .withSimpleCard(outputTitle, outputText)
         .getResponse();
     }
 
@@ -160,7 +174,7 @@ const ChooseServiceTimeHandler = {
       .withSimpleCard('Your appointment request failed', "failed")
       .getResponse(); 
   }   
-}
+};
 
 
 const NetworkStatusIntentHandler = {
@@ -169,11 +183,42 @@ const NetworkStatusIntentHandler = {
       && handlerInput.requestEnvelope.request.intent.name === 'NetworkStatus';
   },
   handle(handlerInput) {
-    const speechText = 'Network is normal. There are 10 alerts at warning level';
+    const responseBuilder = handlerInput.responseBuilder;
+    var speechText = 'Network overall status is normal. ';
     httpGet("", function(res) {
       console.log(res);
     });
-    return handlerInput.responseBuilder
+
+
+    responseBuilder.withStandardCard(
+      "Network Status",
+      speechText,
+      "https://m.media-amazon.com/images/G/01/mobile-apps/dex/logos/alexaLogo2x._V516058141_.png",
+      "https://www.huawei.com/Assets/corp/v2/img/huawei_logo.png"
+    );
+    if (supportsDisplay(handlerInput)) {
+      const image = new Alexa.ImageHelper()
+        .addImageInstance("http://cdn.tweakgeekit.com.au/content/uploads/2014/01/network-status.png")
+        .getImage();
+      const bgImage = new Alexa.ImageHelper()
+        .addImageInstance("http://www.mattcfox.com/wp-content/uploads/2017/12/huawei-logo.jpg")
+        .getImage();
+      const title = "Greater China Telecom";
+      
+      const primaryText = new Alexa.RichTextContentHelper()
+        .withPrimaryText("Network Status is Normal", '<br/>')
+        .getTextContent();
+      responseBuilder.addRenderTemplateDirective({
+        type: "BodyTemplate2",
+        backButton: 'hidden',
+        //backgroundImage: bgImage,
+        image,
+        title,
+        textContent: primaryText,
+      });
+      speechText = 'Network is Normal. An email summary report is also sent';
+    }
+    return responseBuilder
       .speak(speechText)
       .withSimpleCard('Network Status', speechText)
       .getResponse();

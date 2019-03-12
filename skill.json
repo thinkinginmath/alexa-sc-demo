@@ -23,7 +23,10 @@
         "endpoint": {
           "sourceDir": "lambda/custom",
           "uri": "ask-custom-ServiceRequest-default"
-        }
+        },
+	"interfaces": [{
+          "type": "RENDER_TEMPLATE"
+        }]
       }
     },
     "manifestVersion": "1.0"
