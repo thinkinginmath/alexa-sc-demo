@@ -50,31 +50,28 @@ const HelpIntentHandler = {
 };
 
 
-function httpGet(data, callback) {
-  const http = require('http');
-  const options = {
-    host: 'nms1.uubright.com',
-    path: 'api/send_email',
-    port: 80,
+async function httpGet() {
+  var rp = require('request-promise');
+
+  var options = {
+    uri: 'http://nms1.uubright.com/api/send_email',
     method: 'GET'
   };
-  var req = http.request(options, function(res) {
-    var responseString = "";
 
-    res.on("data", function (data) {
-        responseString += data;
-        // save all the data from response
-    });
-    res.on("end", function () {
-        console.log(" FROM REST API", responseString); 
-        callback(responseString);
-        // print to console when response ends
-    });
+  await rp(options).then(function(res) {
+    outputText = "An email is sent with network status";
+  }).catch(function (err) {
+    // API call fail
+    console.log(err);
+    outputTitle = "Your apporintment request failed";
+    outputText = "Request to our backend email service  failed. ";
   });
 
-  req.write(data);
-  req.end();
+  return outputText;
 }
+
+  
+  
 function httpPost(data, callback) {
   const http = require('http');
   const options = {
@@ -176,6 +173,54 @@ const ChooseServiceTimeHandler = {
   }   
 };
 
+const TrendReportHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && (handlerInput.requestEnvelope.request.intent.name === 'MTTRTrend' || 
+      handlerInput.requestEnvelope.request.intent.name === 'IncidentTrend' );
+  },
+
+  handle(handlerInput) {
+    var mttr_url = "https://s3.amazonaws.com/lambda-demo-us-east-1/chart.png";
+    var incident_url = "https://s3.amazonaws.com/lambda-demo-us-east-1/incident.png";
+    var url = mttr_url;
+    const responseBuilder = handlerInput.responseBuilder;
+
+    if (handlerInput.requestEnvelope.request.intent.name === 'IncidentTrend') {
+      url = incident_url;
+    }
+    var title = "Network Service Trend";
+    var speechText = "The statistics is displayed";
+      responseBuilder.withStandardCard(
+      title,
+      "Trend stats in last 6 months",
+      "https://m.media-amazon.com/images/G/01/mobile-apps/dex/logos/alexaLogo2x._V516058141_.png",
+      "https://s3.amazonaws.com/lambda-demo-us-east-1/incident.png"
+      );
+    
+    if (supportsDisplay(handlerInput)) {
+      const primaryText = new Alexa.RichTextContentHelper()
+        .withPrimaryText("Trend stats is displayed", '<br/>')
+        .getTextContent();
+        const image = new Alexa.ImageHelper()
+          .addImageInstance(url)
+          .getImage();
+          responseBuilder.addRenderTemplateDirective({
+            type: "BodyTemplate7",
+            backButton: 'hidden',
+      //backgroundImage: bgImage,
+            image,
+            title,
+            textContent: primaryText
+          });
+    }
+    return responseBuilder
+      .speak(speechText)
+      .withSimpleCard(title, speechText)
+      .getResponse();
+  }
+};
+
 
 const NetworkStatusIntentHandler = {
   canHandle(handlerInput) {
@@ -185,9 +230,7 @@ const NetworkStatusIntentHandler = {
   handle(handlerInput) {
     const responseBuilder = handlerInput.responseBuilder;
     var speechText = 'Network overall status is normal. ';
-    httpGet("", function(res) {
-      console.log(res);
-    });
+    var email_response = httpGet();
 
 
     responseBuilder.withStandardCard(
@@ -209,14 +252,14 @@ const NetworkStatusIntentHandler = {
         .withPrimaryText("Network Status is Normal", '<br/>')
         .getTextContent();
       responseBuilder.addRenderTemplateDirective({
-        type: "BodyTemplate2",
+        type: "BodyTemplate7",
         backButton: 'hidden',
         //backgroundImage: bgImage,
         image,
         title,
         textContent: primaryText,
       });
-      speechText = 'Network is Normal. An email summary report is also sent';
+      speechText = 'Network is Normal. ' + email_response;
     }
     return responseBuilder
       .speak(speechText)
@@ -276,7 +319,8 @@ exports.handler = skillBuilder
     NetworkStatusIntentHandler,
     ChooseServiceTimeHandler,
     CancelAndStopIntentHandler,
-    SessionEndedRequestHandler
+    SessionEndedRequestHandler,
+    TrendReportHandler
   )
   .addErrorHandlers(ErrorHandler)
   .lambda();

@@ -104,6 +104,23 @@
                     ]
                 },
                 {
+                    "name": "MTTRTrend",
+                    "samples": [
+                        "What is the mean time to repair trend",
+                        "What is the trend of mean time to repain",
+                        "What is the mean time to repair stats"
+                    ]
+                },
+                {
+                    "name": "IncidentTrend",
+                    "samples": [
+                        "What is the network incident trend",
+                        "What is the incident trend",
+                        "What is the network incident stats",
+                        "What is the incident stats"
+                    ]
+                },
+                {
                     "name": "NetworkStatus",
                     "samples": [
                         "What is the network status",
